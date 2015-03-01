@@ -21,20 +21,19 @@
 #include <SoftwareSerial.h>
 
 
+#define statusLed	13
+#define errorLed	13
+#define dataLed		13
+
 SoftwareSerial mySerial(10, 11);
 
-int statusLed = 13;
-int errorLed = 13;
-int dataLed = 13;
-
 XBee coordinator = XBee();
-XBeeAddress64 addrBroadcast = XBeeAddress64(0x00000000, ZB_BROADCAST_ADDRESS);
 
 uint8_t payload[] = {0, 0};
 uint8_t cmdMY[] = {'M', 'Y'};
 uint8_t cmdNI[] = {'N', 'I'};
-ZBTxRequest zbTx = ZBTxRequest(addrBroadcast, payload, sizeof(payload));
-RemoteAtCommandRequest atTx = RemoteAtCommandRequest(addrBroadcast, cmdNI);
+ZBTxRequest zbTx = ZBTxRequest(RemoteAtCommandRequest::broadcastAddress64, payload, sizeof(payload));
+RemoteAtCommandRequest atTx = RemoteAtCommandRequest(RemoteAtCommandRequest::broadcastAddress64, cmdNI);
 
 
 XBeeResponse response = XBeeResponse();
@@ -46,9 +45,6 @@ RemoteAtCommandResponse atRx = RemoteAtCommandResponse();
 long currentTime = 0;
 long previousTime = 0;
 long samplingTime = 3 * 1000;
-
-
-void flashLed(int pin, int times, int wait);
 
 
 void setup() {
@@ -72,58 +68,76 @@ void loop() {
 		//coordinator.send(zbTx);
 		coordinator.send(atTx);
 
-		//Serial.print("Sending packet..");
+		mySerial.println("Sending request..");
 	}
 
+	if(CheckPackets()) {
+		DoCommand(response); 
+	}
+
+	
+}
+
+
+boolean CheckPackets() {
+	boolean packetFound = false;
 	coordinator.readPacket();
-	if (coordinator.getResponse().isAvailable()) {
-		uint8_t apiId =  coordinator.getResponse().getApiId();
-		switch (apiId) {
-			case ZB_RX_RESPONSE:
-				coordinator.getResponse().getZBRxResponse(zbRx);
-				if (zbRx.getOption() == ZB_PACKET_ACKNOWLEDGED) {
-					flashLed(statusLed, 10, 10);
-				} else {
-					flashLed(errorLed, 2, 20);
-				}
-				break;
-			case MODEM_STATUS_RESPONSE:
-				coordinator.getResponse().getModemStatusResponse(msr);
-				if (msr.getStatus() == ASSOCIATED) {
-					flashLed(statusLed, 10, 10);
-				} else if (msr.getStatus() == DISASSOCIATED) {
-					flashLed(errorLed, 10, 10);
-				} else {
-					flashLed(statusLed, 5, 10);
-				}
-				break;
-			case REMOTE_AT_COMMAND_RESPONSE:
-				coordinator.getResponse().getRemoteAtCommandResponse(atRx);
-				if (atRx.isOk()) {
-					flashLed(statusLed, 10, 10);
+	response = coordinator.getResponse();
 
-					if (atRx.getValueLength() > 0) {
-						for (int i = 0; i < atRx.getValueLength(); i++) {
-							mySerial.print(atRx.getValue()[i], HEX);
-							mySerial.print(" ");
-						}
-
-						mySerial.println("");
-					}
-				} else {
-					flashLed(errorLed, 1, 25);
-					mySerial.print("Command returned error code: ");
-					mySerial.println(atRx.getStatus(), HEX);
-				}
-				break;
-			default:
-				flashLed(errorLed, 1, 25);
-				break;
-		}
-	} else if (coordinator.getResponse().isError()) {
+	if (response.isAvailable()) {
+		packetFound = true;
+	} else if (response.isError()) {
 		flashLed(errorLed, 1, 25);
 		mySerial.print("Error reading packet.  Error code: ");  
-		mySerial.println(coordinator.getResponse().getErrorCode());
+		mySerial.println(response.getErrorCode());
+	}
+	return packetFound;
+}
+
+
+boolean DoCommand(XBeeResponse &resp) {
+	uint8_t apiId =  resp.getApiId();
+	switch (apiId) {
+		case ZB_RX_RESPONSE:
+			resp.getZBRxResponse(zbRx);
+			if (zbRx.getOption() == ZB_PACKET_ACKNOWLEDGED) {
+				flashLed(statusLed, 10, 10);
+			} else {
+				flashLed(errorLed, 2, 20);
+			}
+			break;
+		case MODEM_STATUS_RESPONSE:
+			resp.getModemStatusResponse(msr);
+			if (msr.getStatus() == ASSOCIATED) {
+				flashLed(statusLed, 10, 10);
+			} else if (msr.getStatus() == DISASSOCIATED) {
+				flashLed(errorLed, 10, 10);
+			} else {
+				flashLed(statusLed, 5, 10);
+			}
+			break;
+		case REMOTE_AT_COMMAND_RESPONSE:
+			resp.getRemoteAtCommandResponse(atRx);
+			if (atRx.isOk()) {
+				flashLed(statusLed, 10, 10);
+
+				if (atRx.getValueLength() > 0) {
+					for (int i = 0; i < atRx.getValueLength(); i++) {
+						mySerial.print( (char)(atRx.getValue()[i]) );
+						mySerial.print(" ");
+					}
+
+					mySerial.println("");
+				}
+			} else {
+				flashLed(errorLed, 1, 25);
+				mySerial.print("Command returned error code: ");
+				mySerial.println(atRx.getStatus(), HEX);
+			}
+			break;
+		default:
+			flashLed(errorLed, 1, 25);
+			break;
 	}
 }
 
