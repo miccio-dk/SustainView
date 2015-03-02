@@ -37,10 +37,12 @@ RemoteAtCommandRequest atTx = RemoteAtCommandRequest(RemoteAtCommandRequest::bro
 
 
 XBeeResponse response = XBeeResponse();
-ZBTxStatusResponse txStatus = ZBTxStatusResponse();
-ZBRxResponse zbRx = ZBRxResponse();
-ModemStatusResponse msr = ModemStatusResponse();
-RemoteAtCommandResponse atRx = RemoteAtCommandResponse();
+ZBTxStatusResponse 		zbTxStatusResp = ZBTxStatusResponse();
+ZBRxResponse 			zbRxResp = ZBRxResponse();
+ModemStatusResponse 	modemStatusResp = ModemStatusResponse();
+RemoteAtCommandResponse remoteAtCommandResp = RemoteAtCommandResponse();
+AtCommandResponse 		atCommandResp = AtCommandResponse();
+
 
 long currentTime = 0;
 long previousTime = 0;
@@ -95,49 +97,71 @@ boolean CheckPackets() {
 }
 
 
+void HandleZBRxResponse(XBeeResponse &resp) {
+	resp.getZBRxResponse(zbRxResp);
+	if (zbRxResp.getOption() == ZB_PACKET_ACKNOWLEDGED) {
+		flashLed(statusLed, 10, 10);
+	} else {
+		flashLed(errorLed, 2, 20);
+	}
+}
+
+void HandleModemStatusResponse(XBeeResponse &resp) {
+	resp.getModemStatusResponse(modemStatusResp);
+	if (modemStatusResp.getStatus() == ASSOCIATED) {
+		flashLed(statusLed, 10, 10);
+	} else if (modemStatusResp.getStatus() == DISASSOCIATED) {
+		flashLed(errorLed, 10, 10);
+	} else {
+		flashLed(statusLed, 5, 10);
+	}
+}
+
+void HandleRemoteAtCommandResponse(XBeeResponse &resp) {
+	resp.getRemoteAtCommandResponse(remoteAtCommandResp);
+	if (remoteAtCommandResp.isOk()) {
+		flashLed(statusLed, 10, 10);
+
+		if (remoteAtCommandResp.getValueLength() > 0) {
+			for (int i = 0; i < remoteAtCommandResp.getValueLength(); i++) {
+				mySerial.print( (char)(remoteAtCommandResp.getValue()[i]) );
+			}
+			mySerial.println("");
+		}
+	} else {
+		flashLed(errorLed, 1, 25);
+		mySerial.print("Command returned error code: ");
+		mySerial.println(remoteAtCommandResp.getStatus(), HEX);
+	}
+}
+
+void HandleAtCommandResponse(XBeeResponse &resp) {
+	resp.getAtCommandResponse(atCommandResp);
+	if (atCommandResp.isOk()) {
+		flashLed(statusLed, 10, 10);
+
+		if (atCommandResp.getValueLength() > 0) {
+			for (int i = 0; i < atCommandResp.getValueLength(); i++) {
+				mySerial.print( (char)(atCommandResp.getValue()[i]) );
+			}
+			mySerial.println("");
+		}
+	} else {
+		flashLed(errorLed, 1, 25);
+		mySerial.print("Command returned error code: ");
+		mySerial.println(atCommandResp.getStatus(), HEX);
+	}
+}
+
 boolean DoCommand(XBeeResponse &resp) {
 	uint8_t apiId =  resp.getApiId();
 	switch (apiId) {
-		case ZB_RX_RESPONSE:
-			resp.getZBRxResponse(zbRx);
-			if (zbRx.getOption() == ZB_PACKET_ACKNOWLEDGED) {
-				flashLed(statusLed, 10, 10);
-			} else {
-				flashLed(errorLed, 2, 20);
-			}
-			break;
-		case MODEM_STATUS_RESPONSE:
-			resp.getModemStatusResponse(msr);
-			if (msr.getStatus() == ASSOCIATED) {
-				flashLed(statusLed, 10, 10);
-			} else if (msr.getStatus() == DISASSOCIATED) {
-				flashLed(errorLed, 10, 10);
-			} else {
-				flashLed(statusLed, 5, 10);
-			}
-			break;
-		case REMOTE_AT_COMMAND_RESPONSE:
-			resp.getRemoteAtCommandResponse(atRx);
-			if (atRx.isOk()) {
-				flashLed(statusLed, 10, 10);
+		case ZB_RX_RESPONSE: 				HandleZBRxResponse(resp);				break;
+		case MODEM_STATUS_RESPONSE: 		HandleModemStatusResponse(resp);		break;
+		case REMOTE_AT_COMMAND_RESPONSE: 	HandleRemoteAtCommandResponse(resp);	break;
+		case AT_COMMAND_RESPONSE: 			HandleAtCommandResponse(resp);			break;
 
-				if (atRx.getValueLength() > 0) {
-					for (int i = 0; i < atRx.getValueLength(); i++) {
-						mySerial.print( (char)(atRx.getValue()[i]) );
-						mySerial.print(" ");
-					}
-
-					mySerial.println("");
-				}
-			} else {
-				flashLed(errorLed, 1, 25);
-				mySerial.print("Command returned error code: ");
-				mySerial.println(atRx.getStatus(), HEX);
-			}
-			break;
-		default:
-			flashLed(errorLed, 1, 25);
-			break;
+		default: 							flashLed(errorLed, 1, 25);				break;
 	}
 }
 
