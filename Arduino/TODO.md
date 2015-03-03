@@ -5,14 +5,14 @@
 ### Priorities
 - [x] fix flashled()
 - [x] place all fields
-- [ ] constructor(s)
+- [x] constructor(s)
 - [x] fix compiler errors
 - [ ] make it work again!
-- [ ] toggle debug
-- [ ] split HandleAtCommand-() functions by command
+- [x] toggle debug
+- [ ] node discovery
+
 
 ### Future features
-- [ ] node discovery
 - [ ] re-send
 
 ## WebHandler:
