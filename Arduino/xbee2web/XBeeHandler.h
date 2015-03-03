@@ -6,6 +6,8 @@
 #include "XBee.h"
 #include <SoftwareSerial.h>
 
+#define MAX_PAYLOAD 100
+
 enum LedType {STATUSLED = 0, ERRORLED, DATALED};
 enum NodeType {COORDINATOR = 0, ROUTER, END_DEVICE};
 enum DebugType {DEBUG_NONE = 0, DEBUG_SERIAL, DEBUG_LEDS, DEBUG_BOTH};
@@ -34,18 +36,21 @@ class XBeeHandler {
 
   void begin();
   void update();
-  uint8_t discover(XBeeNode &list); //send NT -> get timeout -> send ND -> fill struct and return #
+  uint8_t discover(XBeeNode list[], uint8_t maxNodes);
 
 
  private:
-  boolean CheckPackets();
-  boolean DoCommand(XBeeResponse &resp);
+  boolean CheckPackets(uint16_t time);
+  boolean CheckPacketsOld();
+  void HandleResponse(XBeeResponse &resp);
   void HandleZBRxResponse(XBeeResponse &resp);
   void HandleModemStatusResponse(XBeeResponse &resp);
   void HandleRemoteAtCommandResponse(XBeeResponse &resp);
   void HandleAtCommandResponse(XBeeResponse &resp);
+  void HandleUnknown(XBeeResponse &resp);
   void flashLed(LedType type, int times, int wait);
   void init();
+
 
   SoftwareSerial *_serial;
   uint8_t _statusLed;
@@ -53,9 +58,13 @@ class XBeeHandler {
   uint8_t _dataLed;
   boolean _debugSerial;
   boolean _debugLeds;
-  
+
   XBee           _xbee;
   XBeeAddress64  _addr;
+
+  uint8_t       *_data;
+  uint16_t       _dataLen;
+  boolean        _dataEmpty;
 
   ZBTxRequest             _zbTxReq;
   RemoteAtCommandRequest  _remoteAtCommandReq;
