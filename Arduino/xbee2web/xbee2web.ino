@@ -17,7 +17,6 @@
  * along with SustainView.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <SoftwareSerial.h>
 #include "XBeeHandler.h"
 
 

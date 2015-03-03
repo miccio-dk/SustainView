@@ -5,7 +5,8 @@
 #include "XBee.h"
 #include <SoftwareSerial.h>
 
-
+#define SerialDebugEnabled(debugType) (debugType==DEBUG_SERIAL)||(debugType==DEBUG_BOTH)
+#define LedsDebugEnabled(debugType) (debugType==DEBUG_LEDS)||(debugType==DEBUG_BOTH)
 
 
 uint8_t payload[] = {0, 0};
@@ -14,33 +15,87 @@ uint8_t cmdNI[] = {'N', 'I'};
 
 
 XBeeHandler::XBeeHandler(uint8_t statusLed, uint8_t errorLed, uint8_t dataLed, uint8_t rxPin, uint8_t txPin) {
+  setDebugLeds(statusLed, errorLed, dataLed);
+  setDebugSerial(rxPin, txPin);
+  selectDebug(DEBUG_BOTH);
+
+  init();
+}
+
+XBeeHandler::XBeeHandler(uint8_t statusLed, uint8_t errorLed, uint8_t dataLed) {
+  setDebugLeds(statusLed, errorLed, dataLed);
+  detachDebugLSerial();
+  selectDebug(DEBUG_LEDS);
+
+  init();
+}
+
+XBeeHandler::XBeeHandler(uint8_t rxPin, uint8_t txPin) {
+  detachDebugLeds();
+  setDebugSerial(rxPin, txPin);
+  selectDebug(DEBUG_SERIAL);
+
+  init();
+}
+
+XBeeHandler::XBeeHandler() {
+  detachDebugLeds();
+  detachDebugLSerial();
+  selectDebug(DEBUG_NONE);
+
+  init();
+}
+
+XBeeHandler::~XBeeHandler() {
+  delete _serial;
+}
+
+
+void XBeeHandler::selectDebug(DebugType type) {
+  switch (type) {
+    case DEBUG_NONE:   _debugSerial = false; _debugLeds = false; break;
+    case DEBUG_SERIAL: _debugSerial = true;  _debugLeds = false; break;
+    case DEBUG_LEDS:   _debugSerial = false; _debugLeds = true;  break;
+    case DEBUG_BOTH:   _debugSerial = true;  _debugLeds = true;  break;
+    default:           break;
+  }
+}
+
+void XBeeHandler::setDebugSerial(uint8_t rxPin, uint8_t txPin) {
+  _serial = new SoftwareSerial(rxPin, txPin);
+  _serial->begin(9600);
+  _debugSerial = true;
+}
+
+void XBeeHandler::setDebugLeds(uint8_t statusLed, uint8_t errorLed, uint8_t dataLed) {
   _statusLed = statusLed;
   _errorLed = errorLed;
   _dataLed = dataLed;
-  _serial = new SoftwareSerial(rxPin, txPin);
-
-  _xbee = XBee();
-
-  _addr = RemoteAtCommandRequest::broadcastAddress64;
-  _zbTxReq = ZBTxRequest(_addr, payload, sizeof(payload));
-  _atTxReq = RemoteAtCommandRequest(_addr, cmdNI);
-  _response = XBeeResponse();
-  _zbTxStatusResp = ZBTxStatusResponse();
-  _zbRxResp = ZBRxResponse();
-  _modemStatusResp = ModemStatusResponse();
-  _remoteAtCommandResp = RemoteAtCommandResponse();
-  _atCommandResp = AtCommandResponse();
+  _debugLeds = true;
 }
 
+void XBeeHandler::detachDebugLeds() {
+  _statusLed = 0;
+  _errorLed = 0;
+  _dataLed = 0;
+  _debugLeds = false;
+}
+
+void XBeeHandler::detachDebugLSerial() {
+  if(_debugSerial) {delete _serial;}
+  _debugSerial = false;
+}
+
+
 void XBeeHandler::begin() {
-  pinMode(_statusLed, OUTPUT);
-  pinMode(_errorLed, OUTPUT);
-  pinMode(_dataLed,  OUTPUT);
+  if(_debugLeds) {
+    pinMode(_statusLed, OUTPUT);
+    pinMode(_errorLed, OUTPUT);
+    pinMode(_dataLed,  OUTPUT);
+    flashLed(STATUSLED, 3, 50);
+  }
 
-  _serial->begin(9600);
   _xbee.begin(Serial);
-
-  flashLed(STATUSLED, 3, 50);
 }
 
 void XBeeHandler::update() {
@@ -48,6 +103,15 @@ void XBeeHandler::update() {
     DoCommand(_response);
   }
 }
+
+uint8_t XBeeHandler::discover(XBeeNode &list) {
+  uint8_t numNodes = 0;
+
+
+
+  return numNodes;
+}
+
 
 
 boolean XBeeHandler::CheckPackets() {
@@ -146,4 +210,17 @@ void XBeeHandler::flashLed(LedType type, int times, int wait) {
       delay(wait);
     }
   }
+}
+
+void XBeeHandler::init() {
+  _xbee = XBee();
+  _addr = RemoteAtCommandRequest::broadcastAddress64;
+  _zbTxReq = ZBTxRequest(_addr, payload, sizeof(payload));
+  _remoteAtCommandReq = RemoteAtCommandRequest(_addr, cmdNI);
+  _response = XBeeResponse();
+  _zbTxStatusResp = ZBTxStatusResponse();
+  _zbRxResp = ZBRxResponse();
+  _modemStatusResp = ModemStatusResponse();
+  _remoteAtCommandResp = RemoteAtCommandResponse();
+  _atCommandResp = AtCommandResponse();
 }
