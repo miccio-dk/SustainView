@@ -19,10 +19,11 @@
 
 ### Priorities
 - [ ] create files
-- [x] place all fields
+- [ ] place all fields
 - [ ] constructor(s)
-- [x] 
+- [ ] upload data (sensor values etc)
+- [ ] query for changes (actuators, thermostat etc)
 
 ### Future features
-- [ ] node discovery
-- [ ] 
+- [ ] POST over GET (?)
+- [ ] receive settings
