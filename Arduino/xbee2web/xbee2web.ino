@@ -25,13 +25,16 @@
 #define DATALED   13
 #define SOFTRX    10
 #define SOFTTX    11
+#define MAX_NODES 10
+
 
 
 XBeeHandler xbeeHandler(STATUSLED, ERRORLED, DATALED, SOFTRX, SOFTTX);
+XBeeNode list[MAX_NODES];
 
-uint32_t currentTime  = 0;
-uint32_t previousTime = 0;
 uint32_t samplingTime = 3 * 1000;
+uint32_t currentTime  = samplingTime;
+uint32_t previousTime = 0;
 
 
 void setup() {
@@ -40,15 +43,17 @@ void setup() {
 
 
 void loop() {
-  currentTime = millis();
-  if ((currentTime-previousTime) > samplingTime) {
-    previousTime = currentTime;
+//  currentTime = millis();
+//  if ((currentTime-previousTime) > samplingTime) {
+//    previousTime = currentTime;
 
+    xbeeHandler.discover(list, MAX_NODES);
+    while(true);
     // TODO all this stuff in the XBeeHandler class
     // coordinator.send(zbTxReq);
     // coordinator.send(atTxReq);
     // mySerial.println("Sending request..");
-  }
+//  }
 
-  xbeeHandler.update();
+  //xbeeHandler.update();
 }
