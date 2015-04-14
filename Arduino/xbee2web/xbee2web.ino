@@ -17,7 +17,8 @@
  * along with SustainView.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "XBeeHandler.h"
+#include "XBeeHandler.hpp"
+#include "GenericSensor.hpp"
 
 
 #define STATUSLED 13
@@ -47,12 +48,21 @@ void loop() {
 //  if ((currentTime-previousTime) > samplingTime) {
 //    previousTime = currentTime;
 
-    xbeeHandler.discover(list, MAX_NODES);
-    while(true);
-    // TODO all this stuff in the XBeeHandler class
-    // coordinator.send(zbTxReq);
-    // coordinator.send(atTxReq);
-    // mySerial.println("Sending request..");
+	// example usage of of the sensor Library
+	uint8_t pinSetting[] = {2, 3};
+	GenericSensor sensor1(DALLAS, pinSetting);
+	int16_t val = sensor1.readValue(TEMPERATURE);
+
+	// example susage of the xBeeHandler library
+	xbeeHandler.discover(list, MAX_NODES);
+
+
+
+	while(true);
+	// TODO all this stuff in the XBeeHandler class
+	// coordinator.send(zbTxReq);
+	// coordinator.send(atTxReq);
+	// mySerial.println("Sending request..");
 //  }
 
   //xbeeHandler.update();

@@ -4,12 +4,12 @@
 #define GenericSensor_H
 
 // TODO(riccardo) add relevant libraries (ex Dallas etc)
-#include ".h"
+// #include ".h"
 
 #define MAX_PAYLOAD 100
 
 // TODO(riccardo) add sensors and values types: just give them names
-enum SensorType	{SENSOR_NAME = 0, SENSOR_NAME_2, ETC_ETC};
+enum SensorType	{DALLAS = 0, OTHER_SENSOR, ETC_ETC};
 enum ValueType	{TEMPERATURE = 0, PRESSURE, CO2, LIGHT};
 
 
