@@ -17,8 +17,8 @@
  * along with SustainView.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "XBeeHandler.hpp"
-#include "GenericSensor.hpp"
+#include "XBeeHandler.h"
+#include "GenericSensor.h"
 
 
 #define STATUSLED 13
@@ -50,7 +50,7 @@ void loop() {
 
 	// example usage of of the sensor Library
 	uint8_t pinSetting[] = {2, 3};
-	GenericSensor sensor1(DALLAS, pinSetting);
+	GenericSensor sensor1(DALLAS_DS18B20, pinSetting);
 	int16_t val = sensor1.readValue(TEMPERATURE);
 
 	// example susage of the xBeeHandler library
