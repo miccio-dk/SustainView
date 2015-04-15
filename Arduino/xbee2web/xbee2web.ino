@@ -21,17 +21,24 @@
 #include "GenericSensor.h"
 
 
-#define STATUSLED 13
-#define ERRORLED  13
-#define DATALED   13
-#define SOFTRX    10
-#define SOFTTX    11
-#define MAX_NODES 10
+#define STATUSLED	13
+#define ERRORLED	13
+#define DATALED		13
+#define SOFTRX		10
+#define SOFTTX		11
+#define ONEWIRE_PIN	2
+
+#define MAX_NODES	10
 
 
 
 XBeeHandler xbeeHandler(STATUSLED, ERRORLED, DATALED, SOFTRX, SOFTTX);
 XBeeNode list[MAX_NODES];
+
+
+uint8_t pinSetting[] = {ONEWIRE_PIN};		// Dallas sensor: only needs one data pin
+GenericSensor sensor1(DALLAS_DS18B20, pinSetting);
+
 
 uint32_t samplingTime = 3 * 1000;
 uint32_t currentTime  = samplingTime;
@@ -39,7 +46,9 @@ uint32_t previousTime = 0;
 
 
 void setup() {
-  xbeeHandler.begin();
+	// TODO(riccardo) following line disabled for testing sensors library; re-enable when needed
+ 	// xbeeHandler.begin();
+
 }
 
 
@@ -49,12 +58,12 @@ void loop() {
 //    previousTime = currentTime;
 
 	// example usage of of the sensor Library
-	uint8_t pinSetting[] = {2, 3};
-	GenericSensor sensor1(DALLAS_DS18B20, pinSetting);
-	int16_t val = sensor1.readValue(TEMPERATURE);
+	int16_t val1 = 0;
+	float 	val2 = 0;
+	sensor1.readValue(TEMPERATURE, &val2);
 
 	// example susage of the xBeeHandler library
-	xbeeHandler.discover(list, MAX_NODES);
+	// xbeeHandler.discover(list, MAX_NODES);
 
 
 
