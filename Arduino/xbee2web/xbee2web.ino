@@ -27,6 +27,7 @@
 #define SOFTRX		10
 #define SOFTTX		11
 #define ONEWIRE_PIN	2
+#define DTH_PIN		3
 
 #define MAX_NODES	10
 
@@ -36,8 +37,10 @@ XBeeHandler xbeeHandler(STATUSLED, ERRORLED, DATALED, SOFTRX, SOFTTX);
 XBeeNode list[MAX_NODES];
 
 
-uint8_t pinSetting[] = {ONEWIRE_PIN};		// Dallas sensor: only needs one data pin
-GenericSensor sensor1(DALLAS_DS18B20, pinSetting);
+uint8_t pinSetting1[] = {ONEWIRE_PIN};		// Dallas sensor: only needs one data pin
+uint8_t pinSetting2[] = {DTH_PIN};
+GenericSensor sensor1(DALLAS_DS18B20, pinSetting1);
+GenericSensor sensor2(AM2302, pinSetting2);
 
 
 uint32_t samplingTime = 3 * 1000;
@@ -61,6 +64,16 @@ void loop() {
 	int16_t val1 = 0;
 	float 	val2 = 0;
 	sensor1.readValue(TEMPERATURE, &val2);
+	Serial.print("Dallas Temperature: ");
+	Serial.print(val2, 2);
+	Serial.print("°C\n");
+
+	sensor2.readValue(TEMPERATURE, &val2);
+	Serial.print("AM2302 Temperature: ");
+	Serial.print(val2, 2);
+	Serial.print("°C\n");
+
+
 
 	// example susage of the xBeeHandler library
 	// xbeeHandler.discover(list, MAX_NODES);

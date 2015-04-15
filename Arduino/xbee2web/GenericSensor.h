@@ -7,8 +7,8 @@
 #include "SoftwareSerial.h"
 
 // TODO(riccardo) add sensors and values types: just give them names
-enum SensorType	{DALLAS_DS18B20 = 0, OTHER_SENSOR, ETC_ETC};
-enum ValueType	{TEMPERATURE = 0, PRESSURE, CO2, LIGHT};
+enum SensorType	{DALLAS_DS18B20 = 0, AM2302, OTHER_SENSOR, ETC_ETC};
+enum ValueType	{TEMPERATURE = 0, HUMIDITY, PRESSURE, CO2, LIGHT};
 
 class GenericSensor {
 public:
@@ -22,15 +22,18 @@ public:
 
 private:
 	void init();
-	// TODO(riccardo) add reading functions for each sensor and value combination
-	void init_Dallas_DS18B20();	// example
-	// TODO(riccardo) add reading functions for each sensor and value combination
-	float read_Dallas_DS18B20_Temperature();	// example
+		
 
 	SensorType	sensor_type;
 	uint8_t*	pin_settings;
-
 	SoftwareSerial *serial;
+
+	void init_Dallas_DS18B20();
+	void init_AM2302();
+	float read_Dallas_DS18B20_Temperature();
+	float read_AM2302_Temperature();
+	float read_AM2302_Humidity();
+
 };
 
 #endif
