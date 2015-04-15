@@ -13,7 +13,9 @@ enum ValueType	{TEMPERATURE = 0, PRESSURE, CO2, LIGHT};
 class GenericSensor {
 public:
 	GenericSensor(SensorType _sensor_type, uint8_t* _pin_settings);
-	int16_t readValue(ValueType value_type);
+	~GenericSensor();
+	bool readValue(ValueType value_type, int16_t* val);
+	bool readValue(ValueType value_type, float* val);
 
 	bool DEBUG_GENERIC_SENSOR;
 
@@ -23,7 +25,7 @@ private:
 	// TODO(riccardo) add reading functions for each sensor and value combination
 	void init_Dallas_DS18B20();	// example
 	// TODO(riccardo) add reading functions for each sensor and value combination
-	int16_t read_Dallas_DS18B20_Temperature();	// example
+	float read_Dallas_DS18B20_Temperature();	// example
 
 	SensorType	sensor_type;
 	uint8_t*	pin_settings;

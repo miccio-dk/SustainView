@@ -8,6 +8,9 @@
 #include "DallasTemperature.h"
 #include "OneWire.h"
 
+OneWire *one_wire;
+DallasTemperature *dallas_sens;
+
 
 GenericSensor::GenericSensor(SensorType _sensor_type, uint8_t* _pin_settings) {
 	sensor_type = _sensor_type;
@@ -16,20 +19,17 @@ GenericSensor::GenericSensor(SensorType _sensor_type, uint8_t* _pin_settings) {
 	init();
 }
 
-int16_t GenericSensor::readValue(ValueType value_type) {
+GenericSensor::~GenericSensor() {
+	delete dallas_sens;
+	delete one_wire;
+}
+
+bool GenericSensor::readValue(ValueType value_type, int16_t* val) {
 	switch (sensor_type) {
 	case DALLAS_DS18B20:
-		switch (value_type) {
-		case TEMPERATURE:
-			return read_Dallas_DS18B20_Temperature();
-			break;
-		case PRESSURE:
-			// do something
-			break;
-		default:
-			if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read from the sensor");
-		}
+		if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read integer from Dallas DS18B20 sensor");
 		break;
+
 	case OTHER_SENSOR:
 		switch (value_type) {
 		case TEMPERATURE:
@@ -42,11 +42,44 @@ int16_t GenericSensor::readValue(ValueType value_type) {
 			if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read from the sensor");
 		}
 		break;
+
+	default:
+		if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read from the sensor");
+	}
+
+	return false;
+}
+
+bool GenericSensor::readValue(ValueType value_type, float* val) {
+	switch (sensor_type) {
+	case DALLAS_DS18B20:
+		if (value_type == TEMPERATURE) {
+			*val = read_Dallas_DS18B20_Temperature();
+			return true;
+		} else {
+			if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read value type from the sensor");
+		}
+		break;
+
+	case OTHER_SENSOR:
+		switch (value_type) {
+		case TEMPERATURE:
+			// do something
+			break;
+		case PRESSURE:
+			// do something
+			break;
+		default:
+			if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read from the sensor");
+		}
+		break;
+
 	default:
 		if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't initialize the sensor");
 	}
+	
+	return false;
 }
-
 
 void GenericSensor::init() {
 	switch (sensor_type) {
@@ -62,9 +95,12 @@ void GenericSensor::init() {
 }
 
 void GenericSensor::init_Dallas_DS18B20(){
-
+	one_wire = new OneWire(pin_settings[0]);
+	dallas_sens = new DallasTemperature(one_wire);
+	dallas_sens->begin();
 }
 
-int16_t GenericSensor::read_Dallas_DS18B20_Temperature(){
-
+float GenericSensor::read_Dallas_DS18B20_Temperature(){
+	dallas_sens->requestTemperatures();
+	return dallas_sens->getTempCByIndex(0);
 }
