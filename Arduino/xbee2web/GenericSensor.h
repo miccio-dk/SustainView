@@ -1,5 +1,4 @@
-// TODO(riccardo) change name in the copyright boilerplate :D
-// Copyright (c) 2015 Riccardo Miccini, Culo. All rights reserved.
+// Copyright (c) 2015 Riccardo Miccini, Abud Shoka. All rights reserved.
 
 #ifndef GenericSensor_H
 #define GenericSensor_H
@@ -7,8 +6,8 @@
 #include "SoftwareSerial.h"
 
 // TODO(riccardo) add sensors and values types: just give them names
-enum SensorType	{DALLAS_DS18B20 = 0, AM2302, OTHER_SENSOR, ETC_ETC};
-enum ValueType	{TEMPERATURE = 0, HUMIDITY, PRESSURE, CO2, LIGHT};
+enum SensorType	{DALLAS_DS18B20 = 0, AM2302, BMP085, MPL115A2, OTHER_SENSOR, ETC_ETC};
+enum ValueType	{TEMPERATURE = 0, HUMIDITY, PRESSURE, LIGHT};
 
 class GenericSensor {
 public:

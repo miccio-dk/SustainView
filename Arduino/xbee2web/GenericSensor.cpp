@@ -1,5 +1,4 @@
-// TODO(riccardo) change name in the copyright boilerplate :D
-// Copyright (c) 2015 Riccardo Miccini, Culo. All rights reserved.
+// Copyright (c) 2015 Riccardo Miccini, Abud Shoka. All rights reserved.
 
 
 # include "GenericSensor.h"
