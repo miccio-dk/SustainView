@@ -26,7 +26,7 @@ private:
 
 	SensorType	sensor_type;
 	uint8_t*	pin_settings;
-	SoftwareSerial *serial;
+	SoftwareSerial*	serial;
 
 	void init_Dallas_DS18B20();
 	void init_AM2302();

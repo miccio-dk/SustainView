@@ -74,7 +74,6 @@ void loop() {
 	Serial.print("°C\n");
 
 
-
 	// example susage of the xBeeHandler library
 	// xbeeHandler.discover(list, MAX_NODES);
 

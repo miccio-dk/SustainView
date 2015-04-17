@@ -26,6 +26,7 @@ GenericSensor::GenericSensor(SensorType _sensor_type, uint8_t* _pin_settings) {
 GenericSensor::~GenericSensor() {
 	delete dallas_sens;
 	delete one_wire;
+	delete dht;
 }
 
 bool GenericSensor::readValue(ValueType value_type, int16_t* val) {
