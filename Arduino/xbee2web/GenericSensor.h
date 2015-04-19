@@ -29,7 +29,7 @@ private:
 
 	void init_Dallas_DS18B20();
 	void init_AM2302();
-	void init_NTC();
+
 	float read_Dallas_DS18B20_Temperature();
 	float read_AM2302_Temperature();
 	float read_AM2302_Humidity();

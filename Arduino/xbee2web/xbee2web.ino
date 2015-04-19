@@ -28,6 +28,7 @@
 #define SOFTTX		11
 #define ONEWIRE_PIN	2
 #define DTH_PIN		3
+#define NTC_PIN		A0
 
 #define MAX_NODES	10
 
@@ -39,7 +40,7 @@ XBeeNode list[MAX_NODES];
 
 uint8_t pinSetting1[] = {ONEWIRE_PIN};		// Dallas sensor: only needs one data pin
 uint8_t pinSetting2[] = {DTH_PIN};
-uint8_t pinSetting3[] = {NTC};
+uint8_t pinSetting3[] = {NTC_PIN};
 GenericSensor sensor1(DALLAS_DS18B20, pinSetting1);
 GenericSensor sensor2(AM2302, pinSetting2);
 GenericSensor sensor3(NTC, pinSetting3);
@@ -75,7 +76,7 @@ void loop() {
 	Serial.print("°C\n");
 
 	sensor3.readValue(TEMPERATURE, &val2);
-	Serial.println("NTC Temperature: ");
+	Serial.print("NTC Temperature: ");
 	Serial.print(val2, 2);
 	Serial.print("°C\n");
  
