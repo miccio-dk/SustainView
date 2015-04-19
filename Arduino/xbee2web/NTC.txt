@@ -1,0 +1,28 @@
+ * Created: 2/6/2015 12:16:05 AM
+ * Author: Abud
+ */ 
+#include <math.h>
+
+void setup()
+{
+
+	  Serial.begin(9600);
+
+}
+
+void loop()
+{
+float temp;
+ float val = analogRead(A0);
+ temp = log(((10230000/val) - 10000)); 
+ temp = 1 / (0.001129148 + (0.000234125 + (0.0000000876741 * temp * temp ))* temp);
+ temp = temp - 273.15;
+ delay(3000);
+
+ Serial.println("analog Value");
+ Serial.println(val);
+  Serial.println("Temperature");
+ Serial.println(temp);
+	 
+
+}

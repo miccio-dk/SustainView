@@ -39,9 +39,10 @@ XBeeNode list[MAX_NODES];
 
 uint8_t pinSetting1[] = {ONEWIRE_PIN};		// Dallas sensor: only needs one data pin
 uint8_t pinSetting2[] = {DTH_PIN};
+uint8_t pinSetting3[] = {NTC};
 GenericSensor sensor1(DALLAS_DS18B20, pinSetting1);
 GenericSensor sensor2(AM2302, pinSetting2);
-
+GenericSensor sensor3(NTC, pinSetting3);
 
 uint32_t samplingTime = 3 * 1000;
 uint32_t currentTime  = samplingTime;

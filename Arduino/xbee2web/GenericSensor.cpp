@@ -7,11 +7,13 @@
 #include "DallasTemperature.h"
 #include "OneWire.h"
 #include "DHT.h"
+#include "math.h"
 
 
 OneWire *one_wire;
 DallasTemperature *dallas_sens;
 DHT *dht;
+NTC *ntc;
 
 
 
@@ -26,6 +28,7 @@ GenericSensor::~GenericSensor() {
 	delete dallas_sens;
 	delete one_wire;
 	delete dht;
+
 }
 
 bool GenericSensor::readValue(ValueType value_type, int16_t* val) {
@@ -36,6 +39,10 @@ bool GenericSensor::readValue(ValueType value_type, int16_t* val) {
 
 	case AM2302:
 		if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read integer from AM2302 sensor");
+		break;
+
+	case NTC:
+	    if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read integer from NTC sensor");
 		break;
 
 	case OTHER_SENSOR:
@@ -80,6 +87,15 @@ bool GenericSensor::readValue(ValueType value_type, float* val) {
 			if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read value type from AM2302 sensor");
 		}
 		break;
+	case NTC:
+	    if (value_type == TEMPERATURE) {
+			*val = read_NTC_Temperature();
+			return true;
+		} else {
+			if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read value type from NTC sensor");
+		}
+		break;
+
 
 	case OTHER_SENSOR:
 		switch (value_type) {
@@ -109,6 +125,9 @@ void GenericSensor::init() {
 	case AM2302:
 		init_AM2302();
 		break;
+	case NTC:
+	    init_NTC();
+		break;
 	case OTHER_SENSOR:
 		// do something
 		break;
@@ -130,6 +149,12 @@ void GenericSensor::init_AM2302(){
 	dht->begin();
 }
 
+void GenericSensor::init_NTC(){
+	dht = new NTC(pin_settings[0], NTC);
+	ntc->begin();
+}
+
+
 
 // TODO(riccardo) add reading functions for each sensor and value combination
 float GenericSensor::read_Dallas_DS18B20_Temperature(){
@@ -143,4 +168,8 @@ float GenericSensor::read_AM2302_Temperature(){
 
 float GenericSensor::read_AM2302_Humidity(){
 	return dht->readHumidity();
+}
+
+float GenericSensor::read_NTC_Temperature(){
+	return ntc->readTemperature();
 }
