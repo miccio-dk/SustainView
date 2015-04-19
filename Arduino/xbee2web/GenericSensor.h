@@ -6,7 +6,7 @@
 #include "SoftwareSerial.h"
 
 // TODO(riccardo) add sensors and values types: just give them names
-enum SensorType	{DALLAS_DS18B20 = 0, AM2302, BMP085, MPL115A2, NTC, OTHER_SENSOR, ETC_ETC};
+enum SensorType	{DALLAS_DS18B20 = 0, AM2302, BMP085, MPL115A2, NTC, LDR OTHER_SENSOR, ETC_ETC};
 enum ValueType	{TEMPERATURE = 0, HUMIDITY, PRESSURE, LIGHT};
 
 class GenericSensor {
@@ -34,6 +34,7 @@ private:
 	float read_AM2302_Temperature();
 	float read_AM2302_Humidity();
 	float read_NTC_Temperature();
+	float read_LDR_Value();
 
 };
 

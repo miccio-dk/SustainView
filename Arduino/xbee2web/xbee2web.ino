@@ -29,6 +29,7 @@
 #define ONEWIRE_PIN	2
 #define DTH_PIN		3
 #define NTC_PIN		A0
+#define LDR_PIN		A1
 
 #define MAX_NODES	10
 
@@ -41,9 +42,11 @@ XBeeNode list[MAX_NODES];
 uint8_t pinSetting1[] = {ONEWIRE_PIN};		// Dallas sensor: only needs one data pin
 uint8_t pinSetting2[] = {DTH_PIN};
 uint8_t pinSetting3[] = {NTC_PIN};
+uint8_t pinSetting4[] = {LDR_PIN};
 GenericSensor sensor1(DALLAS_DS18B20, pinSetting1);
 GenericSensor sensor2(AM2302, pinSetting2);
 GenericSensor sensor3(NTC, pinSetting3);
+GenericSensor sensor4(LDR, pinSetting4);
 
 uint32_t samplingTime = 3 * 1000;
 uint32_t currentTime  = samplingTime;
@@ -79,6 +82,10 @@ void loop() {
 	Serial.print("NTC Temperature: ");
 	Serial.print(val2, 2);
 	Serial.print("°C\n");
+
+	sensor4.readValue(LIGHT, &val2);
+	Serial.print("LDR Light: ");
+	Serial.print(val2);
  
 
 

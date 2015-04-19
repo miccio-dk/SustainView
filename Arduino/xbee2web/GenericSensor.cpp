@@ -42,6 +42,9 @@ bool GenericSensor::readValue(ValueType value_type, int16_t* val) {
 	case NTC:
 	    if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read integer from NTC sensor");
 		break;
+	case LDR:
+        if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read integer from LDR sensor");
+        break;
 
 	case OTHER_SENSOR:
 		switch (value_type) {
@@ -93,6 +96,14 @@ bool GenericSensor::readValue(ValueType value_type, float* val) {
 			if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read value type from NTC sensor");
 		}
 		break;
+		case LDR:
+	    if (value_type == LIGHIT) {
+			*val = read_LDR_Value();
+			return true;
+		} else {
+			if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read value type from LDR sensor");
+		}
+		break;
 
 
 	case OTHER_SENSOR:
@@ -123,9 +134,7 @@ void GenericSensor::init() {
 	case AM2302:
 		init_AM2302();
 		break;
-	case NTC:
-	    // no initialization required by NTC sensors
-		break;
+	
 	case OTHER_SENSOR:
 		// do something
 		break;
@@ -169,4 +178,13 @@ float GenericSensor::read_NTC_Temperature(){
 	ntc = 1 / (0.001129148 + (0.000234125 + (0.0000000876741 * ntc * ntc )) * ntc);
 	ntc = ntc - 273.15;
 	return ntc;
+}
+
+float GenericSensor::read_LDR_Value(){
+	float val = analogRead(pin_settings[0]);
+	
+	if(val<400){
+    	}	return true;
+	else{
+		}	return false;
 }
