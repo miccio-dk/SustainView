@@ -74,6 +74,12 @@ void loop() {
 	Serial.print(val2, 2);
 	Serial.print("°C\n");
 
+	sensor3.readValue(TEMPERATURE, &val2);
+	Serial.println("NTC Temperature: ");
+	Serial.print(val2, 2);
+	Serial.print("°C\n");
+ 
+
 
 	// example susage of the xBeeHandler library
 	// xbeeHandler.discover(list, MAX_NODES);

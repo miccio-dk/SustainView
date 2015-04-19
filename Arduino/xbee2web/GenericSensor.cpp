@@ -150,7 +150,7 @@ void GenericSensor::init_AM2302(){
 }
 
 void GenericSensor::init_NTC(){
-	dht = new NTC(pin_settings[0], NTC);
+	ntc = new NTC(pin_settings[0], NTC);
 	ntc->begin();
 }
 
@@ -171,5 +171,10 @@ float GenericSensor::read_AM2302_Humidity(){
 }
 
 float GenericSensor::read_NTC_Temperature(){
+ 
+ float val = analogRead(A0);
+   ntc = log(((10230000/val) - 10000)); 
+   ntc = 1 / (0.001129148 + (0.000234125 + (0.0000000876741 * ntc * ntc ))* ntc);
+   ntc = ntc - 273.15;
 	return ntc->readTemperature();
 }
