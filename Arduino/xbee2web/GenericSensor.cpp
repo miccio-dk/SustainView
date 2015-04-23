@@ -9,6 +9,7 @@
 #include "DHT.h"
 #include "math.h"
 #include "Adafruit_MPL115A2.h"
+#include "Wire.h"
 
 
 OneWire *one_wire;
@@ -44,9 +45,16 @@ bool GenericSensor::readValue(ValueType value_type, int16_t* val) {
 	case NTC:
 	    if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read integer from NTC sensor");
 		break;
+
 	case LDR:
-        if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read integer from LDR sensor");
-        break;
+		if (value_type == LIGHT) {
+			*val = read_LDR_Value();
+			return true;
+		} else {
+			if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read value type from LDR sensor");
+		}
+		break;
+
     case MPL115A2:
         if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read integer from MPL115A2 sensor");
         break;
@@ -93,6 +101,7 @@ bool GenericSensor::readValue(ValueType value_type, float* val) {
 			if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read value type from AM2302 sensor");
 		}
 		break;
+
 	case NTC:
 	    if (value_type == TEMPERATURE) {
 			*val = read_NTC_Temperature();
@@ -101,14 +110,11 @@ bool GenericSensor::readValue(ValueType value_type, float* val) {
 			if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read value type from NTC sensor");
 		}
 		break;
-		case LDR:
-	    if (value_type == LIGHIT) {
-			*val = read_LDR_Value();
-			return true;
-		} else {
-			if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read value type from LDR sensor");
-		}
-		break;
+
+	case LDR:
+	    if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read float from LDR sensor");
+        break;
+	    
 	case MPL115A2:
 		if (value_type == TEMPERATURE) {
 			*val = read_MPL115A2_Temperature();
@@ -147,13 +153,19 @@ void GenericSensor::init() {
 	case DALLAS_DS18B20:
 		init_Dallas_DS18B20();
 		break;
+
 	case AM2302:
 		init_AM2302();
 		break;
+
 	case MPL115A2:
 	    init_MPL115A2();
 	    break;
-	
+
+	case NTC:
+	case LDR:
+		break;
+
 	case OTHER_SENSOR:
 		// do something
 		break;
@@ -176,7 +188,7 @@ void GenericSensor::init_AM2302(){
 }
 
 void GenericSensor::init_MPL115A2(){
-	i2c = new Adafruit_MPL115A2(pin_settings[0]);
+	i2c = new Adafruit_MPL115A2();
 	i2c->begin();
 }
 
@@ -196,20 +208,16 @@ float GenericSensor::read_AM2302_Humidity(){
 }
 
 float GenericSensor::read_NTC_Temperature(){
-	float val = analogRead(pin_settings[0]);
+	uint16_t val = analogRead(pin_settings[0]);
 	float ntc = log(((10230000/val) - 10000)); 
 	ntc = 1 / (0.001129148 + (0.000234125 + (0.0000000876741 * ntc * ntc )) * ntc);
 	ntc = ntc - 273.15;
 	return ntc;
 }
 
-float GenericSensor::read_LDR_Value(){
-	float val = analogRead(pin_settings[0]);
-	
-	if(val<400){
-    	}	return true;
-	else{
-		}	return false;
+bool GenericSensor::read_LDR_Value(){
+	uint16_t val = analogRead(pin_settings[0]);
+	return (val<pin_settings[1]);
 }
 
 float GenericSensor::read_MPL115A2_Temperature(){
