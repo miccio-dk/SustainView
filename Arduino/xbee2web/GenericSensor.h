@@ -29,12 +29,15 @@ private:
 
 	void init_Dallas_DS18B20();
 	void init_AM2302();
+	void init_MPL115A2();
 
 	float read_Dallas_DS18B20_Temperature();
 	float read_AM2302_Temperature();
 	float read_AM2302_Humidity();
 	float read_NTC_Temperature();
 	float read_LDR_Value();
+	float read_MPL115A2_Temperature();
+	float read_MPL115A2_Pressure();
 
 };
 

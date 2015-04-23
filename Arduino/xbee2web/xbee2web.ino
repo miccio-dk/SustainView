@@ -30,6 +30,7 @@
 #define DTH_PIN		3
 #define NTC_PIN		A0
 #define LDR_PIN		A1
+#define MPL115A2 // should be checked 
 
 #define MAX_NODES	10
 
@@ -43,10 +44,12 @@ uint8_t pinSetting1[] = {ONEWIRE_PIN};		// Dallas sensor: only needs one data pi
 uint8_t pinSetting2[] = {DTH_PIN};
 uint8_t pinSetting3[] = {NTC_PIN};
 uint8_t pinSetting4[] = {LDR_PIN};
+uint8_t pinSetting5[] = {MPL115A2}; // should be checked
 GenericSensor sensor1(DALLAS_DS18B20, pinSetting1);
 GenericSensor sensor2(AM2302, pinSetting2);
 GenericSensor sensor3(NTC, pinSetting3);
 GenericSensor sensor4(LDR, pinSetting4);
+GenericSensor sensor5(MPL115A2, pinSetting5);
 
 uint32_t samplingTime = 3 * 1000;
 uint32_t currentTime  = samplingTime;
@@ -86,6 +89,15 @@ void loop() {
 	sensor4.readValue(LIGHT, &val2);
 	Serial.print("LDR Light: ");
 	Serial.print(val2);
+
+	sensor5.readValue(TEMPERATURE, &val2);
+	Serial.print("MPL115A2 Temperature: ");
+	Serial.print(val2, 2);
+	Serial.print("°C\n");
+	sensor5.readValue(PRESSURE, &val2);
+	Serial.print("MPL115A2 Pressure: ");
+	Serial.print(val2, 2);
+	Serial.print("Pa\n");
  
 
 
