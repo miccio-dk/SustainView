@@ -7,7 +7,7 @@
 
 // TODO(riccardo) add sensors and values types: just give them names
 enum SensorType	{DALLAS_DS18B20 = 0, AM2302, BMP085, MPL115A2, NTC, LDR, OTHER_SENSOR, ETC_ETC};
-enum ValueType	{TEMPERATURE = 0, HUMIDITY, PRESSURE, LIGHT};
+enum ValueType	{TEMPERATURE = 0, HUMIDITY, PRESSURE, LIGHT, ALTITUDE};
 
 class GenericSensor {
 public:
@@ -30,6 +30,7 @@ private:
 	void init_Dallas_DS18B20();
 	void init_AM2302();
 	void init_MPL115A2();
+    void init_BMP085();
 
 	float read_Dallas_DS18B20_Temperature();
 	float read_AM2302_Temperature();
@@ -38,7 +39,9 @@ private:
 	bool read_LDR_Value();
 	float read_MPL115A2_Temperature();
 	float read_MPL115A2_Pressure();
-
+    float read_BMP085_Temperature();
+	float read_BMP085_Pressure();
+	float read_BMP085_Altitude();
 };
 
 #endif

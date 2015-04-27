@@ -44,11 +44,13 @@ uint8_t pinSetting2[] = {DTH_PIN};
 uint8_t pinSetting3[] = {NTC_PIN};
 uint8_t pinSetting4[] = {LDR_PIN, 400};		// storing the sensor threshold so it can be changed
 uint8_t pinSetting5[] = {0};				// not storing anything (no need for pins)
+uint8_t pinSetting6[] = {0};
 GenericSensor sensor1(DALLAS_DS18B20, pinSetting1);
 GenericSensor sensor2(AM2302, pinSetting2);
 GenericSensor sensor3(NTC, pinSetting3);
 GenericSensor sensor4(LDR, pinSetting4);
 GenericSensor sensor5(MPL115A2, pinSetting5);
+GenericSensor sensor6(BMP085, pinSetting6);
 
 uint32_t samplingTime = 3 * 1000;
 uint32_t currentTime  = samplingTime;
@@ -99,7 +101,20 @@ void loop() {
 	Serial.print(val2, 2);
 	Serial.print("Pa\n");
  
+    sensor6.readValue(TEMPERATURE, &val2);
+	Serial.print("BMP085 Temperature: ");
+	Serial.print(val2, 2);
+	Serial.print("°C\n");
 
+	sensor6.readValue(PRESSURE, &val2);
+	Serial.print("BMP085 Pressure: ");
+	Serial.print(val2, 2);
+	Serial.print("Pa\n");
+
+	sensor6.readValue(ALTITUDE, &val2);
+	Serial.print("BMP085 Altitude: ");
+	Serial.print(val2, 2);
+	Serial.print("Meters\n");
 
 	// example susage of the xBeeHandler library
 	// xbeeHandler.discover(list, MAX_NODES);

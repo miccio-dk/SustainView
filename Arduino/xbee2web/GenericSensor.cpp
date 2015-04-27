@@ -10,12 +10,14 @@
 #include "math.h"
 #include "Adafruit_MPL115A2.h"
 #include "Wire.h"
+#include "Adafruit_BMP085.h"
 
 
 OneWire *one_wire;
 DallasTemperature *dallas_sens;
 DHT *dht;
 Adafruit_MPL115A2 *i2c;
+Adafruit_BMP085 *bmp;
 
 
 GenericSensor::GenericSensor(SensorType _sensor_type, uint8_t* _pin_settings) {
@@ -30,6 +32,7 @@ GenericSensor::~GenericSensor() {
 	delete one_wire;
 	delete dht;
 	delete i2c;
+	delete bmp;
 }
 
 bool GenericSensor::readValue(ValueType value_type, int16_t* val) {
@@ -59,6 +62,9 @@ bool GenericSensor::readValue(ValueType value_type, int16_t* val) {
         if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read integer from MPL115A2 sensor");
         break;
 
+    case BMP085:
+        if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read integer from BMP085 sensor");
+        break;
 	case OTHER_SENSOR:
 		switch (value_type) {
 		case TEMPERATURE:
@@ -127,6 +133,21 @@ bool GenericSensor::readValue(ValueType value_type, float* val) {
 		}
 		break;
 
+case BMP085:
+		if (value_type == TEMPERATURE) {
+			*val = read_BMP085_Temperature();
+			return true;
+		} else if (value_type == PRESSURE) {
+			*val = read_BMP085_Pressure();
+			return true;
+		} else if (value_type == PRESSURE) {
+			*val = read_BMP085_Altitude();
+			return true;
+		} 
+		else {
+			if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read value type from MPL115A2 sensor");
+		}
+		break;
 
 	case OTHER_SENSOR:
 		switch (value_type) {
@@ -162,6 +183,9 @@ void GenericSensor::init() {
 	    init_MPL115A2();
 	    break;
 
+   case BMP085:
+	    init_BMP085();
+	    break;
 	case NTC:
 	case LDR:
 		break;
@@ -192,6 +216,10 @@ void GenericSensor::init_MPL115A2(){
 	i2c->begin();
 }
 
+void GenericSensor::init_BMP085(){
+	bmp = new Adafruit_BMP085();
+	bmp->begin();
+}
 
 // TODO(riccardo) add reading functions for each sensor and value combination
 float GenericSensor::read_Dallas_DS18B20_Temperature(){
@@ -227,3 +255,15 @@ float GenericSensor::read_MPL115A2_Temperature(){
 float GenericSensor::read_MPL115A2_Pressure(){
 	return i2c->getPressure();
 }
+
+
+float GenericSensor::read_BMP085_Temperature(){
+	return bmp->readTemperature();
+}
+
+float GenericSensor::read_BMP085_Pressure(){
+	return bmp->readPressure();
+}
+
+float GenericSensor::read_BMP085_Altitude(){
+	return bmp->readAltitude();
