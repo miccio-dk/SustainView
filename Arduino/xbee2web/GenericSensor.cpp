@@ -3,7 +3,7 @@
 
 # include "GenericSensor.h"
 
-// TODO(riccardo) add relevant libraries (ex Dallas etc)
+// DONE(riccardo) add relevant libraries (ex Dallas etc)
 #include "DallasTemperature.h"
 #include "OneWire.h"
 #include "DHT.h"
@@ -65,18 +65,6 @@ bool GenericSensor::readValue(ValueType value_type, int16_t* val) {
     case BMP085:
         if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read integer from BMP085 sensor");
         break;
-	case OTHER_SENSOR:
-		switch (value_type) {
-		case TEMPERATURE:
-			// do something
-			break;
-		case PRESSURE:
-			// do something
-			break;
-		default:
-			if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read from the sensor");
-		}
-		break;
 
 	default:
 		if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read from the sensor");
@@ -140,25 +128,11 @@ case BMP085:
 		} else if (value_type == PRESSURE) {
 			*val = read_BMP085_Pressure();
 			return true;
-		} else if (value_type == PRESSURE) {
+		} else if (value_type == ALTITUDE) {
 			*val = read_BMP085_Altitude();
 			return true;
-		} 
-		else {
+		} else {
 			if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read value type from MPL115A2 sensor");
-		}
-		break;
-
-	case OTHER_SENSOR:
-		switch (value_type) {
-		case TEMPERATURE:
-			// do something
-			break;
-		case PRESSURE:
-			// do something
-			break;
-		default:
-			if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't read from the sensor");
 		}
 		break;
 
@@ -186,20 +160,18 @@ void GenericSensor::init() {
    case BMP085:
 	    init_BMP085();
 	    break;
+
 	case NTC:
 	case LDR:
 		break;
 
-	case OTHER_SENSOR:
-		// do something
-		break;
 	default:
 		if(DEBUG_GENERIC_SENSOR) serial->println("GenericSensor error: couldn't enable the sensor");
 	}
 }
 
 
-// TODO(riccardo) add reading functions for each sensor and value combination
+// DONE(riccardo) add reading functions for each sensor and value combination
 void GenericSensor::init_Dallas_DS18B20(){
 	one_wire = new OneWire(pin_settings[0]);
 	dallas_sens = new DallasTemperature(one_wire);
@@ -221,7 +193,7 @@ void GenericSensor::init_BMP085(){
 	bmp->begin();
 }
 
-// TODO(riccardo) add reading functions for each sensor and value combination
+// DONE(riccardo) add reading functions for each sensor and value combination
 float GenericSensor::read_Dallas_DS18B20_Temperature(){
 	dallas_sens->requestTemperatures();
 	return dallas_sens->getTempCByIndex(0);
@@ -256,7 +228,6 @@ float GenericSensor::read_MPL115A2_Pressure(){
 	return i2c->getPressure();
 }
 
-
 float GenericSensor::read_BMP085_Temperature(){
 	return bmp->readTemperature();
 }
@@ -267,3 +238,4 @@ float GenericSensor::read_BMP085_Pressure(){
 
 float GenericSensor::read_BMP085_Altitude(){
 	return bmp->readAltitude();
+}
