@@ -43,14 +43,13 @@ uint8_t pinSetting1[] = {ONEWIRE_PIN};		// Dallas sensor: only needs one data pi
 uint8_t pinSetting2[] = {DTH_PIN};
 uint8_t pinSetting3[] = {NTC_PIN};
 uint8_t pinSetting4[] = {LDR_PIN, 400};		// storing the sensor threshold so it can be changed
-uint8_t pinSetting5[] = {0};				// not storing anything (no need for pins)
-uint8_t pinSetting6[] = {0};
+
 GenericSensor sensor1(DALLAS_DS18B20, pinSetting1);
 GenericSensor sensor2(AM2302, pinSetting2);
 GenericSensor sensor3(NTC, pinSetting3);
 GenericSensor sensor4(LDR, pinSetting4);
-GenericSensor sensor5(MPL115A2, pinSetting5);
-GenericSensor sensor6(BMP085, pinSetting6);
+GenericSensor sensor5(MPL115A2, NULL);
+GenericSensor sensor6(BMP085, NULL);
 
 uint32_t samplingTime = 3 * 1000;
 uint32_t currentTime  = samplingTime;
