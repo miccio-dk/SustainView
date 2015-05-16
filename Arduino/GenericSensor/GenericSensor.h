@@ -16,7 +16,9 @@ public:
 	bool readValue(ValueType value_type, int16_t* val);
 	bool readValue(ValueType value_type, float* val);
 
-	bool DEBUG_GENERIC_SENSOR;
+	void enableDebug(SoftwareSerial* _serial);
+	void disableDebug();
+	
 
 
 private:
@@ -25,7 +27,9 @@ private:
 
 	SensorType	sensor_type;
 	uint8_t*	pin_settings;
+
 	SoftwareSerial*	serial;
+	bool DEBUG_GENERIC_SENSOR;
 
 	void init_Dallas_DS18B20();
 	void init_AM2302();

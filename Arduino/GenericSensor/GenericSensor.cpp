@@ -3,7 +3,6 @@
 
 # include "GenericSensor.h"
 
-// DONE(riccardo) add relevant libraries (ex Dallas etc)
 #include "DallasTemperature.h"
 #include "OneWire.h"
 #include "DHT.h"
@@ -14,25 +13,19 @@
 
 
 OneWire *one_wire;
-DallasTemperature *dallas_sens;
-DHT *dht;
-Adafruit_MPL115A2 *i2c;
-Adafruit_BMP085 *bmp;
+void *obj;
 
 
 GenericSensor::GenericSensor(SensorType _sensor_type, uint8_t* _pin_settings) {
 	sensor_type = _sensor_type;
 	pin_settings = _pin_settings;
-	DEBUG_GENERIC_SENSOR = true;
+	DEBUG_GENERIC_SENSOR = false;
 	init();
 }
 
 GenericSensor::~GenericSensor() {
-	delete dallas_sens;
 	delete one_wire;
-	delete dht;
-	delete i2c;
-	delete bmp;
+	delete obj;
 }
 
 bool GenericSensor::readValue(ValueType value_type, int16_t* val) {
@@ -121,7 +114,7 @@ bool GenericSensor::readValue(ValueType value_type, float* val) {
 		}
 		break;
 
-case BMP085:
+	case BMP085:
 		if (value_type == TEMPERATURE) {
 			*val = read_BMP085_Temperature();
 			return true;
@@ -142,6 +135,16 @@ case BMP085:
 	
 	return false;
 }
+
+void GenericSensor::enableDebug(SoftwareSerial* _serial) {
+	serial = _serial;
+	DEBUG_GENERIC_SENSOR = true;
+}
+
+void GenericSensor::disableDebug() {
+	DEBUG_GENERIC_SENSOR = false;
+}
+
 
 void GenericSensor::init() {
 	switch (sensor_type) {
@@ -170,41 +173,39 @@ void GenericSensor::init() {
 	}
 }
 
-
-// DONE(riccardo) add reading functions for each sensor and value combination
 void GenericSensor::init_Dallas_DS18B20(){
 	one_wire = new OneWire(pin_settings[0]);
-	dallas_sens = new DallasTemperature(one_wire);
-	dallas_sens->begin();
+
+	obj = new DallasTemperature(one_wire);
+	static_cast<DallasTemperature *>(obj)->begin();
 }
 
 void GenericSensor::init_AM2302(){
-	dht = new DHT(pin_settings[0], DHT22);
-	dht->begin();
+	obj = new DHT(pin_settings[0], DHT22);
+	static_cast<DHT *>(obj)->begin();
 }
 
 void GenericSensor::init_MPL115A2(){
-	i2c = new Adafruit_MPL115A2();
-	i2c->begin();
+	obj = new Adafruit_MPL115A2();
+	static_cast<Adafruit_MPL115A2 *>(obj)->begin();
 }
 
 void GenericSensor::init_BMP085(){
-	bmp = new Adafruit_BMP085();
-	bmp->begin();
+	obj = new Adafruit_BMP085();
+	static_cast<Adafruit_BMP085 *>(obj)->begin();
 }
 
-// DONE(riccardo) add reading functions for each sensor and value combination
 float GenericSensor::read_Dallas_DS18B20_Temperature(){
-	dallas_sens->requestTemperatures();
-	return dallas_sens->getTempCByIndex(0);
+	static_cast<DallasTemperature *>(obj)->requestTemperatures();
+	return static_cast<DallasTemperature *>(obj)->getTempCByIndex(0);
 }
 
 float GenericSensor::read_AM2302_Temperature(){
-	return dht->readTemperature();
+	return static_cast<DHT *>(obj)->readTemperature();
 }
 
 float GenericSensor::read_AM2302_Humidity(){
-	return dht->readHumidity();
+	return static_cast<DHT *>(obj)->readHumidity();
 }
 
 float GenericSensor::read_NTC_Temperature(){
@@ -221,21 +222,21 @@ bool GenericSensor::read_LDR_Value(){
 }
 
 float GenericSensor::read_MPL115A2_Temperature(){
-	return i2c->getTemperature();
+	return static_cast<Adafruit_MPL115A2 *>(obj)->getTemperature();
 }
 
 float GenericSensor::read_MPL115A2_Pressure(){
-	return i2c->getPressure();
+	return static_cast<Adafruit_MPL115A2 *>(obj)->getPressure();
 }
 
 float GenericSensor::read_BMP085_Temperature(){
-	return bmp->readTemperature();
+	return static_cast<Adafruit_BMP085 *>(obj)->readTemperature();
 }
 
 float GenericSensor::read_BMP085_Pressure(){
-	return bmp->readPressure();
+	return static_cast<Adafruit_BMP085 *>(obj)->readPressure();
 }
 
 float GenericSensor::read_BMP085_Altitude(){
-	return bmp->readAltitude();
+	return static_cast<Adafruit_BMP085 *>(obj)->readAltitude();
 }

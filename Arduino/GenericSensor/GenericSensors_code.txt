@@ -1,0 +1,66 @@
+#define ONEWIRE_PIN	2
+#define DTH_PIN		3
+#define NTC_PIN		A0
+#define LDR_PIN		A1
+
+#include "GenericSensor.h"
+
+uint8_t pinSetting1[] = {ONEWIRE_PIN};		// Dallas sensor: only needs one data pin
+uint8_t pinSetting2[] = {DTH_PIN};
+uint8_t pinSetting3[] = {NTC_PIN};
+uint8_t pinSetting4[] = {LDR_PIN, 400};		// storing the sensor threshold so it can be changed
+
+GenericSensor sensor1(DALLAS_DS18B20, pinSetting1);
+GenericSensor sensor2(AM2302, pinSetting2);
+GenericSensor sensor3(NTC, pinSetting3);
+GenericSensor sensor4(LDR, pinSetting4);
+GenericSensor sensor5(MPL115A2, NULL);
+GenericSensor sensor6(BMP085, NULL);
+
+// example usage of of the sensor Library
+int16_t val1 = 0;
+float 	val2 = 0;
+
+sensor1.readValue(TEMPERATURE, &val2);
+Serial.print("Dallas Temperature: ");
+Serial.print(val2, 2);
+Serial.print("°C\n");
+
+sensor2.readValue(TEMPERATURE, &val2);
+Serial.print("AM2302 Temperature: ");
+Serial.print(val2, 2);
+Serial.print("°C\n");
+
+sensor3.readValue(TEMPERATURE, &val2);
+Serial.print("NTC Temperature: ");
+Serial.print(val2, 2);
+Serial.print("°C\n");
+
+sensor4.readValue(LIGHT, &val2);
+Serial.print("LDR Light: ");
+Serial.print(val2);
+
+sensor5.readValue(TEMPERATURE, &val2);
+Serial.print("MPL115A2 Temperature: ");
+Serial.print(val2, 2);
+Serial.print("°C\n");
+
+sensor5.readValue(PRESSURE, &val2);
+Serial.print("MPL115A2 Pressure: ");
+Serial.print(val2, 2);
+Serial.print("Pa\n");
+
+sensor6.readValue(TEMPERATURE, &val2);
+Serial.print("BMP085 Temperature: ");
+Serial.print(val2, 2);
+Serial.print("°C\n");
+
+sensor6.readValue(PRESSURE, &val2);
+Serial.print("BMP085 Pressure: ");
+Serial.print(val2, 2);
+Serial.print("Pa\n");
+
+sensor6.readValue(ALTITUDE, &val2);
+Serial.print("BMP085 Altitude: ");
+Serial.print(val2, 2);
+Serial.print("Meters\n");

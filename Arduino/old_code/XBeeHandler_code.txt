@@ -1,0 +1,19 @@
+#define STATUSLED	13
+#define ERRORLED	13
+#define DATALED		13
+#define MAX_NODES	10
+
+#include "XBeeHandler.h"
+
+XBeeHandler xbeeHandler(STATUSLED, ERRORLED, DATALED, SOFTRX, SOFTTX);
+XBeeNode list[MAX_NODES];
+
+
+// example susage of the xBeeHandler library
+xbeeHandler.discover(list, MAX_NODES);
+
+// TODO all this stuff in the XBeeHandler class
+coordinator.send(zbTxReq);
+coordinator.send(atTxReq);
+
+xbeeHandler.update();
