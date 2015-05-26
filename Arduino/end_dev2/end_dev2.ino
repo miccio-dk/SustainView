@@ -1,0 +1,144 @@
+/**
+ * Copyright (c) 2015 Riccardo Miccini, Abed Shoka. All rights reserved.
+ *
+ * This file is part of SustainView.
+ *
+ * SustainView is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * SustainView is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with SustainView.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "DallasTemperature.h"
+#include "DHT.h"
+#include "Adafruit_MPL115A2.h"
+#include "Wire.h"
+#include "OneWire.h"
+#include "Adafruit_BMP085.h"
+#include "GenericSensor.h"
+#include "SoftwareSerial.h"
+#include "XBee.h"
+
+#define PL_TEMPERATURE	(1<<0)
+#define PL_HUMIDITY		(1<<1)
+#define PL_PRESSURE		(1<<2)
+#define PL_LIGHT		(1<<3)
+#define PL_ALTITUDE		(1<<4)
+#define PL_NODE			((1)<<5)
+
+#define SOFTRX		A0
+#define SOFTTX		A1
+#define ONEWIRE_PIN	12
+#define DHT_PIN		10
+#define XBSLEEP		A2
+
+
+uint32_t samplingTime = 30 * 1000;
+uint32_t currentTime  = samplingTime;
+uint32_t previousTime = 0;
+
+float temp1, hum1;
+uint8_t pinSetting1[] = {ONEWIRE_PIN};
+uint8_t pinSetting2[] = {DHT_PIN};
+uint8_t payload[9];
+
+
+GenericSensor sensor1(DALLAS_DS18B20, pinSetting1);
+GenericSensor sensor2(AM2302, pinSetting2);
+SoftwareSerial serialSW(SOFTRX, SOFTTX);
+
+
+XBee xbee = XBee();
+XBeeAddress64 addr64 = XBeeAddress64(0, 0);
+ZBTxRequest zbTx = ZBTxRequest(addr64, payload, sizeof(payload));
+ZBTxStatusResponse txStatus = ZBTxStatusResponse();
+
+
+void flashLed(int pin, int times, int wait);
+void packFloat(float f, uint8_t *c);
+
+void setup() {
+	Serial.begin(9600);
+	serialSW.begin(9600);
+	xbee.setSerial(serialSW);
+	Serial.println("Software starting..");
+
+	sensor1.enableDebug(Serial);
+	sensor2.enableDebug(Serial);
+	
+	sensor1.init();
+	sensor2.init();
+}
+
+
+void loop() {
+	currentTime = millis();
+	if ((currentTime-previousTime) > samplingTime) {
+		previousTime = currentTime;
+
+		payload[0] = (PL_NODE | PL_TEMPERATURE | PL_HUMIDITY);
+
+		if(sensor1.readValue(TEMPERATURE, &temp1)) Serial.print("\nDALLAS data acq. succesful: ");
+		packFloat(temp1, payload+1);
+		Serial.println(temp1, 2);
+
+		if(sensor2.readValue(HUMIDITY, &hum1)) Serial.print("DHT data acq. succesful: ");
+		packFloat(hum1, payload+5);
+		Serial.println(hum1, 2);
+
+		pinMode(XBSLEEP, OUTPUT);
+		digitalWrite(XBSLEEP, LOW);
+		delay(2000);
+
+		xbee.send(zbTx);
+
+		Serial.print("\nPacket sent. Payload content: [ ");
+		Serial.print(payload[0], BIN);
+		for(int i=0; i<8; i++) {
+			Serial.print(" ");
+			Serial.print(payload[i], HEX);
+		}
+		Serial.println(" ]");
+
+		if (xbee.readPacket(500)) {
+			// got a response!
+			Serial.print("Received response: ");
+
+			// should be a znet tx status            	
+			if (xbee.getResponse().getApiId() == ZB_TX_STATUS_RESPONSE) {
+				xbee.getResponse().getZBTxStatusResponse(txStatus);
+
+				// get the delivery status, the fifth byte
+				if (txStatus.getDeliveryStatus() == SUCCESS) {
+					Serial.println("succesful!");
+				} else {
+					Serial.println("fail!");
+				}
+			} else if (xbee.getResponse().isError()) {
+				Serial.print("error code ");  
+				Serial.println(xbee.getResponse().getErrorCode());
+			} else {
+				Serial.print("unknown packet ");  
+				Serial.println(xbee.getResponse().getApiId());
+			}
+		} else {
+			Serial.println("Local XBee timeout!");
+		}
+
+		pinMode(XBSLEEP, INPUT);
+		digitalWrite(XBSLEEP, HIGH);
+	
+	}
+}
+
+void packFloat(float f, uint8_t *c) {
+	memcpy(c, &f, 4);
+}
